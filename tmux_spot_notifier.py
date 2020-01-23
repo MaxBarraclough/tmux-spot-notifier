@@ -27,6 +27,7 @@ import libtmux
 import requests
 
 ## Standard libs:
+import signal
 import functools
 import datetime
 import threading
@@ -170,6 +171,15 @@ def reset_panes_and_schedule_blink(server, session, num_previous_blinks, invoke_
         t.start()
 
 
+def handle_exit_signal(signalNumber, frame):
+    exit(0)
+
+
+def register_exit_handler():
+    signal.signal(signal.SIGTERM, handle_exit_signal)
+    signal.signal(signal.SIGINT,  handle_exit_signal)
+
+
 def parse_arguments():
     epi = \
 """   Run this script on an Amazon EC2 spot instance, in its own tmux window (tab),
@@ -237,6 +247,7 @@ session_name_was_found = (target_session_name in existing_sessions_dict)
 
 if (session_name_was_found):
     target_session = existing_sessions_dict[target_session_name]
+    register_exit_handler()
 #   time.sleep(4)
     block_until_doomed()
 
